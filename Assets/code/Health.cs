@@ -1,18 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 public class Health : MonoBehaviour
 {
-    [SerializeField] int maxHealth; private bool defense = false;
-    int currentHealth; public GameObject pausebutton;
-    public HealthBar healthBar; public takedame huhu;
-    public UnityEvent onDeath;
+    [SerializeField] public int maxHealth;                         private bool defense = false;
+    public int currentHealth;                                      public GameObject pausebutton;
+    public HealthBar healthBar;                                    public TextMeshProUGUI healCountText;
+    public UnityEvent onDeath;                                     public takedame huhu;
     public Animator anim;
     public GameObject gameOverCanvas;
     public float maxFallHeight = -8f;
     public int maxHealingCount;
     public int currentHealingCount = 0;
+    
     //private AudioManager audioManager;
     public GameObject pauseButton;
     //private void Awake()
@@ -20,9 +22,10 @@ public class Health : MonoBehaviour
     //    audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
     //}
     private void Start()
-    {
+    {       
         currentHealth = maxHealth;
         healthBar.UpdateHealth(currentHealth, maxHealth);
+        UpdateHealCountText();
     }
     public void FixedUpdate()
     {
@@ -36,7 +39,7 @@ public class Health : MonoBehaviour
     }
     public void Update()
     {
-        if (defense)
+        if(defense)
         {
             huhu.attackDamage = 0;
         }
@@ -48,29 +51,20 @@ public class Health : MonoBehaviour
         Recover();
     }
     public void takeDamage(int damage)
-    {
-        if (!defense)
-
+    {   
+        if(!defense)
         {
             currentHealth -= damage;
+            currentHealth = Mathf.Max(currentHealth, 0);  // Đảm bảo máu không giảm xuống dưới 0
             if (currentHealth < maxHealth)
             {
                 anim.SetTrigger("isHurt");
             }
-        }
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
-
-
-        if (currentHealth <= 0)
-        {
-
-            Die();
-        }
-
-
+            if (currentHealth <= 0)
+            {
+                Die();
+            }
+        }  
         healthBar.UpdateHealth(currentHealth, maxHealth);
     }
 
@@ -92,6 +86,7 @@ public class Health : MonoBehaviour
     public void Recover()
     {
         maxHealingCount = enemyHealth.totalDeathCount;
+        UpdateHealCountText();
         if (currentHealingCount < maxHealingCount)
         {
             if (Input.GetKeyDown("c"))
@@ -102,12 +97,19 @@ public class Health : MonoBehaviour
                     anim.SetTrigger("Recover");
                 }
                 currentHealingCount++;
-                healthBar.UpdateHealth(currentHealth, maxHealth);
+                UpdateHealCountText();
+                healthBar.UpdateHealth(currentHealth, maxHealth);                
             }
         }
     }
+    private void UpdateHealCountText()
+    {
+        healCountText.text = (maxHealingCount - currentHealingCount).ToString();
+    }
+
     public void Die()
     {
+        currentHealth = 0; // Đảm bảo máu không giảm xuống dưới 0 khi chết
         Destroy(gameObject as GameObject);
         onDeath.Invoke();
 
@@ -122,17 +124,23 @@ public class Health : MonoBehaviour
         //audioManager.musicAudioSource.Stop();
         //audioManager.PlaySFX(audioManager.musicDie);   
     }
+    public void FullHeal()
+    {
+        currentHealth = maxHealth;
+        healthBar.UpdateHealth(currentHealth, maxHealth);
+    }
+
     public void defence()
     {
         if (Input.GetKey("q"))
         {
-
             defense = true;
             anim.SetBool("defense", defense);
         }
         else
-
+        {
             defense = false;
-        anim.SetBool("defense", defense);
+            anim.SetBool("defense", defense);
+        }
     }
 }
