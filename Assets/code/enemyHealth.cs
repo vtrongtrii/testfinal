@@ -7,10 +7,9 @@ public class enemyHealth : MonoBehaviour
     public int maxHealth = 100;
     public int currentHealth;
     public Slider EnemyHealth;
-
+    public int healAmount;
     bool isAlive = true;
-
-
+    public int DamageIncreaseAmount;
     public Animator anim;
 
     // Start is called before the first frame update
@@ -50,20 +49,34 @@ public class enemyHealth : MonoBehaviour
         anim.SetTrigger("Isdead");
         isAlive = false;
         Debug.Log("chet roi");
-        StartCoroutine(RemoveAfterDelay(0.75f));
+        StartCoroutine(DieCoroutine());
     }
-
-
-    private IEnumerator RemoveAfterDelay(float delay)
+    IEnumerator DieCoroutine()
     {
-        yield return new WaitForSeconds(delay);
+        // Đợi cho đến khi animation chết hoàn tất
+        yield return new WaitForSeconds(anim.GetCurrentAnimatorStateInfo(0).length);
+
+        // Hủy đối tượng sau khi animation hoàn tất
         Destroy(gameObject);
     }
     public static int totalDeathCount = 0;
 
     private void OnDestroy()
     {
-
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null)
+        {
+            Health playerHealth = player.GetComponent<Health>();
+            if (playerHealth != null)
+            {
+                playerHealth.Heal(healAmount);
+            }
+            takedame takedame = player.GetComponent<takedame>();
+            if (takedame != null)
+            {
+                takedame.DamageIncreae(DamageIncreaseAmount);
+            }
+        }
         totalDeathCount++;
     }
     // Update is called once per frame

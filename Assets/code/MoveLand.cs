@@ -1,51 +1,71 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveLand : MonoBehaviour
 {
-    public Transform platfrom;
-    public Transform starPoint;
+    public Transform platform;
+    public Transform startPoint;
     public Transform endPoint;
-    public float speed=1.5f;
-    int direction = 1;
+    public float speed = 1.5f;
 
+    private Transform currentTarget;
+    private bool isBossDead = false;
 
-
-    private void Update()
+    void Start()
     {
-        Vector2 target = currentMovementTarget();
+        // Đăng ký sự kiện BossDied
+        bossHealth.BossDied += StartMoving;
+        currentTarget = startPoint;
+    }
 
-        platfrom.position = Vector2.MoveTowards(platfrom.position, target, speed*Time.deltaTime);
+    void OnDestroy()
+    {
+        // Hủy đăng ký sự kiện BossDied để tránh rò rỉ bộ nhớ
+        bossHealth.BossDied -= StartMoving;
+    }
 
-        float distance = (target-(Vector2)platfrom.position).magnitude; 
+    void StartMoving()
+    {
+        isBossDead = true;
+    }
 
-        if(distance <= 0.1f)
+    private void FixedUpdate()
+    {
+        // Di chuyển nền chỉ khi boss đã chết
+        if (isBossDead)
         {
-            direction*= -1;
+            MovePlatform();
         }
     }
 
-
-
-    Vector2 currentMovementTarget()
+    void MovePlatform()
     {
-        if (direction == 1)
+        platform.position = Vector2.MoveTowards(platform.position, currentTarget.position, speed * Time.deltaTime);
+
+        if (Vector2.Distance(platform.position, currentTarget.position) < 0.1f)
         {
-            return starPoint.position;
+            ChangeDirection();
+        }
+    }
+
+    void ChangeDirection()
+    {
+        if (currentTarget == startPoint)
+        {
+            currentTarget = endPoint;
         }
         else
         {
-            return endPoint.position;
+            currentTarget = startPoint;
         }
-
     }
     private void OnDrawGizmos()
     {
-        if(platfrom != null && starPoint!=null && endPoint!= null)
+        if (platform != null && startPoint != null && endPoint != null)
         {
-            Gizmos.DrawLine(platfrom.transform.position, starPoint.position);
-            Gizmos.DrawLine(platfrom.transform.position, endPoint.position);
+            Gizmos.DrawLine(platform.transform.position, startPoint.position);
+            Gizmos.DrawLine(platform.transform.position, endPoint.position);
         }
     }
 }

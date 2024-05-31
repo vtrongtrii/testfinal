@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ public class bossHealth : MonoBehaviour
     public Animator anim;
     private BossDamage enemyAttack;
     private enemies_move enemyMovement;
+    public static event Action BossDied;
     // Start is called before the first frame update
     void Start()
     {
@@ -48,6 +50,7 @@ public class bossHealth : MonoBehaviour
     }
     void Die()
     {
+        BossDied?.Invoke();
         if (!isAlive)
             return;
 

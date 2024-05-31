@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,12 +12,42 @@ public class BossDamage : MonoBehaviour
     public float chaseRange = 10f;
     public float attackRange = 2f;
     public float attackCooldown = 2f;
-    private float nextAttackTime = 2f;
+    public float nextAttackTime = 2f;
     private bool isDead = false;
 
     void Start()
     {
-        // Initialize any required components or variables
+        // Nếu các biến không được gán trong Inspector, bạn có thể khởi tạo chúng ở đây
+        if (anim == null)
+        {
+            anim = GetComponent<Animator>();
+            if (anim == null)
+            {
+                Debug.LogError("Animator chưa được gán và không tìm thấy Animator trên GameObject.");
+            }
+        }
+
+        if (target == null)
+        {
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null)
+            {
+                target = player.transform;
+            }
+            else
+            {
+                Debug.LogError("Không tìm thấy đối tượng với tag 'Player'.");
+            }
+        }
+
+        if (speed == null)
+        {
+            speed = GetComponent<enemies_move>();
+            if (speed == null)
+            {
+                Debug.LogError("Speed chưa được gán và không tìm thấy Speed trên GameObject.");
+            }
+        }
     }
 
     void Update()
@@ -45,6 +75,11 @@ public class BossDamage : MonoBehaviour
     }
     void Chase()
     {
+        if (anim == null || target == null || speed == null)
+        {
+            Debug.LogError("Một trong các tham chiếu cần thiết chưa được gán.");
+            return;
+        }
         anim.SetTrigger("Walking");
         transform.position = Vector3.MoveTowards(transform.position, target.position, speed.speed * Time.deltaTime);
     }
