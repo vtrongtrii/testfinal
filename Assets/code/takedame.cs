@@ -7,12 +7,15 @@ public class takedame : MonoBehaviour
 {
     public Animator animator;
     public Transform attackPoint;
-    public float attackRange = 0.5f;
+    public float attackRange = 1f;
     public LayerMask enemyLayers;
     public int attackDamage = 20;
+    public int CurrentAttackDamage;
     public float attackRate = 1f;
     public float nextAttackTime = 0f;
     private bool isAttacking = false;
+    public AudioManager audioManager; // Thêm biến tham chiếu đến AudioManager
+    public GameObject damageTextPrefab; // Reference to DamageText prefab
     // Update is called once per frame
     void Update()
     {
@@ -31,69 +34,31 @@ public class takedame : MonoBehaviour
         }
 
     }
-    //void Attack()
-    //{
-    //    animamtor.SetTrigger("Attack");
-    //    Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
-    //    foreach (Collider2D enemy in hitEnemies)
-    //    {
-    //        enemyHealth enemyComponent = enemy.GetComponent<enemyHealth>();
-    //        if (enemyComponent != null)
-    //        {
-    //            enemyComponent.TakeDamage(attackDamage);
-    //        }
-    //        else
-    //        {
-    //            // Kiểm tra xem đối tượng có thành phần bossHealth không
-    //            bossHealth bossComponent = enemy.GetComponent<bossHealth>();
-    //            if (bossComponent != null)
-    //            {
-    //                bossComponent.TakeDamage(attackDamage);
-    //            }
-    //        }
-
-    //    }
-
-
-    //    }
-    //void critAttack()
-    //{
-    //    animamtor.SetTrigger("CritAttack");
-    //    Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
-    //    foreach (Collider2D enemy in hitEnemies)
-    //    {
-    //        enemyHealth enemyComponent = enemy.GetComponent<enemyHealth>();
-    //        if (enemyComponent != null)
-    //        {
-    //            enemyComponent.TakeDamage(attackDamage*2);
-    //        }
-    //        else
-    //        {
-    //            // Kiểm tra xem đối tượng có thành phần bossHealth không
-    //            bossHealth bossComponent = enemy.GetComponent<bossHealth>();
-    //            if (bossComponent != null)
-    //            {
-    //                bossComponent.TakeDamage(attackDamage*2);
-    //            }
-    //        }
-
-    //    }
-    //}
     IEnumerator Attack()
     {
+        // Phát âm thanh sfx khi đánh
+        if (audioManager != null)
+        {
+            audioManager.PlaySFX(audioManager.strikePlayerClip);
+        }
         isAttacking = true;
         animator.SetTrigger("Attack");
         yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-        PerformAttack(attackDamage);
+        PerformAttack(CurrentAttackDamage);
         isAttacking = false;
     }
 
     IEnumerator CritAttack()
     {
+        // Phát âm thanh sfx khi đánh
+        if (audioManager != null)
+        {
+            audioManager.PlaySFX(audioManager.strikePlayerClip);
+        }
         isAttacking = true;
         animator.SetTrigger("CritAttack");
         yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-        PerformAttack(attackDamage * 2);
+        PerformAttack(CurrentAttackDamage * 2);
         isAttacking = false;
     }
 
@@ -106,6 +71,7 @@ public class takedame : MonoBehaviour
             if (enemyComponent != null)
             {
                 enemyComponent.TakeDamage(damage);
+                ShowDamageText(damage, enemy.transform.position); // Show damage text
             }
             else
             {
@@ -113,7 +79,21 @@ public class takedame : MonoBehaviour
                 if (bossComponent != null)
                 {
                     bossComponent.TakeDamage(damage);
+                    ShowDamageText(damage, bossComponent.transform.position); // Show damage text
                 }
+            }
+        }
+    }
+
+    void ShowDamageText(int damage, Vector3 position)
+    {
+        if (damageTextPrefab != null)
+        {
+            GameObject damageTextInstance = Instantiate(damageTextPrefab, position, Quaternion.identity);
+            DamageText damageText = damageTextInstance.GetComponent<DamageText>();
+            if (damageText != null)
+            {
+                damageText.SetText(damage.ToString());
             }
         }
     }
@@ -122,5 +102,13 @@ public class takedame : MonoBehaviour
         if (attackPoint == null)
             return;
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
+    public void DamageIncreae(int amount)
+    {
+        CurrentAttackDamage += amount;
+    }
+    public int GetCurrentDamage()
+    {
+        return CurrentAttackDamage;
     }
 }

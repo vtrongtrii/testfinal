@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -40,7 +40,7 @@ public class dichuyen : MonoBehaviour
         if (Input.GetButtonDown("Jump") && isGrounded())
         {
             rb.AddForce(new Vector2(rb.velocity.x, jump * 10));
-           
+
         }
         animator.SetBool("IsJumping", !isGrounded());
 
@@ -49,25 +49,27 @@ public class dichuyen : MonoBehaviour
         animator.SetFloat("Run", Mathf.Abs(left_right));
 
 
-      
+
         if (Input.GetMouseButtonDown(1))
         {
             animator.SetTrigger("CritAttack");
         }
-        
-
-    
+        float longitude = transform.position.y;
 
 
-
-        //Check if character just started falling
+        if (longitude >= -12.6f && longitude <= 21f)
+        {
+            // Nếu nằm trong khoảng, vô hiệu hóa animation nhảy
+            animator.SetBool("IsJumping", false);
+        }
     }
+
 
     public bool isGrounded()
     {
         if (Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, groundLayer))
         {
-            return true;    
+            return true;
         }
         else
 
@@ -81,16 +83,16 @@ public class dichuyen : MonoBehaviour
     }
 
     void flip()
+    {
+        if (isfacingRight && left_right < 0 || !isfacingRight && left_right > 0)
         {
-            if (isfacingRight && left_right < 0 || !isfacingRight && left_right > 0)
-            {
-                isfacingRight = !isfacingRight;
-                Vector3 size = transform.localScale;
-                size.x = size.x * -1;
-                transform.localScale = size;
-            }
+            isfacingRight = !isfacingRight;
+            Vector3 size = transform.localScale;
+            size.x = size.x * -1;
+            transform.localScale = size;
         }
     }
+}
 
 
 
