@@ -7,17 +7,17 @@ public class BossDamage : MonoBehaviour
     public Health playerHealth;
     public int damage = 30;
     public Animator anim;
-    public enemies_move speed;
+    public float speed = 5;
     public Transform target;
     public float chaseRange = 10f;
     public float attackRange = 2f;
     public float attackCooldown = 2f;
-    public float nextAttackTime = 2f;
+    private float nextAttackTime = 0f;
     private bool isDead = false;
+    private bool facingRight = true; // Để theo dõi hướng hiện tại của boss
 
     void Start()
     {
-        // Nếu các biến không được gán trong Inspector, bạn có thể khởi tạo chúng ở đây
         if (anim == null)
         {
             anim = GetComponent<Animator>();
@@ -39,20 +39,10 @@ public class BossDamage : MonoBehaviour
                 Debug.LogError("Không tìm thấy đối tượng với tag 'Player'.");
             }
         }
-
-        if (speed == null)
-        {
-            speed = GetComponent<enemies_move>();
-            if (speed == null)
-            {
-                Debug.LogError("Speed chưa được gán và không tìm thấy Speed trên GameObject.");
-            }
-        }
     }
 
     void Update()
     {
-
         if (isDead) return;
 
         if (target != null && Time.time >= nextAttackTime)
@@ -69,33 +59,39 @@ public class BossDamage : MonoBehaviour
             }
             else
             {
-                StopChase();
+                anim.SetBool("isRunning", false);
             }
         }
     }
+
     void Chase()
     {
-        if (anim == null || target == null || speed == null)
+        anim.SetBool("isRunning", true);
+        Vector3 direction = (target.position - transform.position).normalized;
+
+        // Đảm bảo boss di chuyển về phía player
+        transform.position = Vector3.MoveTowards(transform.position, target.position, speed * Time.deltaTime);
+
+        // Kiểm tra và lật hướng của boss nếu cần thiết
+        if ((direction.x > 0 && !facingRight) || (direction.x < 0 && facingRight))
         {
-            Debug.LogError("Một trong các tham chiếu cần thiết chưa được gán.");
-            return;
+            Flip();
         }
-        anim.SetTrigger("Walking");
-        transform.position = Vector3.MoveTowards(transform.position, target.position, speed.speed * Time.deltaTime);
     }
 
-    void StopChase()
+    void Flip()
     {
-        anim.ResetTrigger("Walking");
+        facingRight = !facingRight;
+        Vector3 localScale = transform.localScale;
+        localScale.x *= -1;
+        transform.localScale = localScale;
     }
 
     public void Attack()
     {
-
         if (isDead) return;
 
-        // Randomly select between attack1 and attack2
-        int attackType = Random.Range(1, 3); // Returns either 1 or 2
+        int attackType = Random.Range(1, 3);
         if (attackType == 1)
         {
             anim.SetTrigger("Attack");
@@ -105,7 +101,7 @@ public class BossDamage : MonoBehaviour
             anim.SetTrigger("Attack2");
         }
 
-        float attackDelay = 0.25f; // Adjust delay as needed
+        float attackDelay = 0.25f;
         Invoke("DealDamage", attackDelay);
     }
 
@@ -113,7 +109,6 @@ public class BossDamage : MonoBehaviour
     {
         if (isDead) return;
 
-        // Check if there's a target within attack range
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
         foreach (Collider2D col in hitColliders)
         {
@@ -130,11 +125,7 @@ public class BossDamage : MonoBehaviour
 
         isDead = true;
         anim.SetTrigger("Die");
-        // Disable further actions
-        speed.enabled = false;
         this.enabled = false;
-        // Heal the player to full health
-
     }
 
     void OnDrawGizmosSelected()

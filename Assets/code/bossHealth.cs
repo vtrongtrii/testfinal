@@ -15,6 +15,7 @@ public class bossHealth : MonoBehaviour
     private BossDamage enemyAttack;
     private enemies_move enemyMovement;
     public static event Action BossDied;
+    public int increaseMaxHealthAmount = 100;
     // Start is called before the first frame update
     void Start()
     {
@@ -58,6 +59,7 @@ public class bossHealth : MonoBehaviour
         anim.SetTrigger("Isdead");
         BossHealth.gameObject.SetActive(false);
         playerHealth.currentHealth = playerHealth.maxHealth;
+        playerHealth.IncreaseMaxHealth(increaseMaxHealthAmount);
         Debug.Log("Boss đã chết");
 
         // Vô hiệu hóa các thành phần điều khiển hành vi của quái

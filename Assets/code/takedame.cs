@@ -1,10 +1,14 @@
-﻿using System.Collections;
+﻿using JetBrains.Annotations;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class takedame : MonoBehaviour
 {
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private GameObject[] fireballs;
     public Animator animator;
     public Transform attackPoint;
     public float attackRange = 1f;
@@ -16,22 +20,32 @@ public class takedame : MonoBehaviour
     private bool isAttacking = false;
     public AudioManager audioManager; // Thêm biến tham chiếu đến AudioManager
     public GameObject damageTextPrefab; // Reference to DamageText prefab
+    public bool defense;
+    public Health playerHealth;
     // Update is called once per frame
     void Update()
     {
+
         if (Time.time >= nextAttackTime && !isAttacking)
         {
             if (Input.GetMouseButtonDown(0))
             {
                 StartCoroutine(Attack());
-                nextAttackTime = Time.time + 1f / attackRate;
+                nextAttackTime = Time.time + 0f / attackRate;
             }
             if (Input.GetMouseButtonDown(1))
             {
                 StartCoroutine(CritAttack());
                 nextAttackTime = Time.time + 5f / attackRate;
             }
+            if (Input.GetKey("e"))
+            {
+                animator.SetTrigger("spell");
+                 Cast();
+            }
         }
+
+
 
     }
     IEnumerator Attack()
@@ -61,9 +75,27 @@ public class takedame : MonoBehaviour
         PerformAttack(CurrentAttackDamage * 2);
         isAttacking = false;
     }
-
+    private void Cast()
+    {
+        fireballs[0].transform.position = firePoint.position;
+        fireballs[0].GetComponent<spell>().SetDirection(Mathf.Sign(transform.localScale.x));
+    }
+    private int FindFireball()
+    {
+        for (int i = 0; i < fireballs.Length; i++)
+        {
+            if(!fireballs[i].gameObject.activeInHierarchy)
+                return i;
+        }
+        return 0;
+    }
     void PerformAttack(int damage)
     {
+        if (playerHealth != null && playerHealth.IsDefending())
+        {
+            Debug.Log("Cannot attack while defending.");
+            return;
+        }
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
         foreach (Collider2D enemy in hitEnemies)
         {
@@ -76,10 +108,18 @@ public class takedame : MonoBehaviour
             else
             {
                 bossHealth bossComponent = enemy.GetComponent<bossHealth>();
+               
                 if (bossComponent != null)
                 {
                     bossComponent.TakeDamage(damage);
+                     
                     ShowDamageText(damage, bossComponent.transform.position); // Show damage text
+                }
+                boss2Health boss2Component = enemy.GetComponent<boss2Health>();
+                if (boss2Component != null)
+                {
+                    boss2Component.TakeDamage(damage);
+                    ShowDamageText(damage, boss2Component.transform.position); // Show damage text
                 }
             }
         }
