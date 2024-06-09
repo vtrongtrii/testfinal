@@ -60,12 +60,30 @@ public class MoveLand : MonoBehaviour
             currentTarget = startPoint;
         }
     }
+
     private void OnDrawGizmos()
     {
         if (platform != null && startPoint != null && endPoint != null)
         {
             Gizmos.DrawLine(platform.transform.position, startPoint.position);
             Gizmos.DrawLine(platform.transform.position, endPoint.position);
+        }
+    }
+
+    // Xử lý va chạm để gắn nhân vật vào nền di chuyển
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            collision.transform.SetParent(platform);
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            collision.transform.SetParent(null);
         }
     }
 }

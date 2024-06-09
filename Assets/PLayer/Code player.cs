@@ -55,13 +55,6 @@ public class dichuyen : MonoBehaviour
             animator.SetTrigger("CritAttack");
         }
         float longitude = transform.position.y;
-
-
-        if (longitude >= -12.6f && longitude <= 21f)
-        {
-            // Nếu nằm trong khoảng, vô hiệu hóa animation nhảy
-            animator.SetBool("IsJumping", false);
-        }
     }
 
 

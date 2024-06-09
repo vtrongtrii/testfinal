@@ -1,14 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR;
 public class Health : MonoBehaviour
 {
-    [SerializeField] public int maxHealth;         private bool defense = false;
-    public int currentHealth;                      public GameObject pausebutton;
-    public HealthBar healthBar;                    public takedame huhu;
-    public UnityEvent onDeath;                     public GameObject healTextPrefab; // Prefab cho HealText
+    [SerializeField] public int maxHealth; public bool defense = false;
+    public int currentHealth; public GameObject pausebutton;
+    public HealthBar healthBar; public takedame huhu;
+    public UnityEvent onDeath; public GameObject healTextPrefab; // Prefab cho HealText
     public Animator anim;
     public GameObject gameOverCanvas;
     public float maxFallHeight = -8f;
@@ -17,6 +20,7 @@ public class Health : MonoBehaviour
     private AudioManager audioManager;
     public GameObject pauseButton;
     public Vector3 healTextOffset = new Vector3(0, 2, 0); // Vị trí offset của HealText
+    private List<GameObject> healTextInstances = new List<GameObject>(); // Danh sách để quản lý các HealText instances
     private void Awake()
     {
         audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
@@ -38,16 +42,7 @@ public class Health : MonoBehaviour
     }
     public void Update()
     {
-        if (defense)
-        {
-            huhu.attackDamage = 0;
-        }
-        else
-        {
-            huhu.attackDamage = 20;
-        }
         defence();
-
     }
     public void takeDamage(int damage)
     {
@@ -72,6 +67,7 @@ public class Health : MonoBehaviour
         {
             Vector3 healTextPosition = transform.position + healTextOffset; // Vị trí xuất hiện của HealText
             GameObject healTextInstance = Instantiate(healTextPrefab, healTextPosition, Quaternion.identity);
+            healTextInstances.Add(healTextInstance); // Thêm instance vào danh sách
             HealText healText = healTextInstance.GetComponent<HealText>();
             if (healText != null)
             {
@@ -89,11 +85,17 @@ public class Health : MonoBehaviour
         }
         ShowHealText("+" + amount, Color.green);
     }
+
+    public void IncreaseMaxHealth(int amount)
+    {
+        maxHealth += amount;
+        currentHealth = maxHealth; // Đặt lại máu hiện tại bằng máu tối đa mới
+    }
     public void Die()
     {
-        Destroy(gameObject as GameObject);
-        onDeath.Invoke();
-
+        CleanUpHealTexts(); // Dọn dẹp các HealText trước khi phá hủy GameObject
+        Destroy(gameObject);
+        onDeath.Invoke(); 
         anim.SetTrigger("Isdead");
         if (pauseButton != null)
         {
@@ -105,6 +107,7 @@ public class Health : MonoBehaviour
         audioManager.musicAudioSource.Stop();
         audioManager.PlaySFX(audioManager.musicDie);
     }
+
     public void defence()
     {
         if (Input.GetKey("q"))
@@ -118,4 +121,32 @@ public class Health : MonoBehaviour
             defense = false;
         anim.SetBool("defense", defense);
     }
+    public bool IsDefending()
+    {
+        return defense;
+    }
+    private void OnApplicationQuit()
+    {
+        // Phá hủy tất cả các HealText instances khi ứng dụng kết thúc
+        CleanUpHealTexts();
+    }
+
+    private void OnDestroy()
+    {
+        // Phá hủy tất cả các HealText instances khi GameObject bị phá hủy
+        CleanUpHealTexts();
+    }
+
+    public void CleanUpHealTexts()
+    {
+        foreach (GameObject healText in healTextInstances)
+        {
+            if (healText != null)
+            {
+                Destroy(healText);
+            }
+        }
+        healTextInstances.Clear();
+    }
 }
+ 
