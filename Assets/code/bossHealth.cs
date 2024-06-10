@@ -10,7 +10,6 @@ public class bossHealth : MonoBehaviour
     public Slider BossHealth;
     public Health playerHealth;
     bool isAlive = true;
-
     public Animator anim;
     private BossDamage enemyAttack;
     private enemies_move enemyMovement;
@@ -19,7 +18,6 @@ public class bossHealth : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
         currentHealth = maxHealth;
         BossHealth.maxValue = maxHealth;
         BossHealth.value = maxHealth;
@@ -61,7 +59,6 @@ public class bossHealth : MonoBehaviour
         playerHealth.currentHealth = playerHealth.maxHealth;
         playerHealth.IncreaseMaxHealth(increaseMaxHealthAmount);
         Debug.Log("Boss đã chết");
-
         // Vô hiệu hóa các thành phần điều khiển hành vi của quái
         if (enemyAttack != null)
         {

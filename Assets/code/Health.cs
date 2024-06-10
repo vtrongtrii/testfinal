@@ -57,6 +57,7 @@ public class Health : MonoBehaviour
         }
         if (currentHealth <= 0)
         {
+ 
             Die();
         }
         healthBar.UpdateHealth(currentHealth, maxHealth);
@@ -94,9 +95,9 @@ public class Health : MonoBehaviour
     public void Die()
     {
         CleanUpHealTexts(); // Dọn dẹp các HealText trước khi phá hủy GameObject
-        Destroy(gameObject);
+         
         onDeath.Invoke(); 
-        anim.SetTrigger("Isdead");
+       
         if (pauseButton != null)
         {
             pauseButton.SetActive(false); // hoặc pauseButton.SetActive(false);
@@ -148,5 +149,6 @@ public class Health : MonoBehaviour
         }
         healTextInstances.Clear();
     }
+     
 }
  

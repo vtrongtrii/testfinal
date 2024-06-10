@@ -10,7 +10,7 @@ public class MoveLand : MonoBehaviour
     public float speed = 1.5f;
 
     private Transform currentTarget;
-    private bool isBossDead = false;
+    public bool isBossDead = false;
 
     void Start()
     {

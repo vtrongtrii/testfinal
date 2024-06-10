@@ -25,9 +25,10 @@ public class spell : MonoBehaviour
             Damage();
         }
 
-
+        // Di chuyển theo đường thẳng
         float movementSpeed = speed * Time.deltaTime;
         transform.Translate(movementSpeed * direction, 0, 0);
+
         lifetime += Time.deltaTime;
         if (lifetime > 5) gameObject.SetActive(false);
     }
@@ -66,10 +67,8 @@ public class spell : MonoBehaviour
         gameObject.SetActive(true);
         hit = false;
         boxCollider.enabled = true;
-        float localScaleX = transform.localScale.x;
-        if (Mathf.Sign(localScaleX) != _direction)
-            localScaleX = -localScaleX;
-        transform.localScale = new Vector3(localScaleX, transform.localScale.y, transform.localScale.z);
+
+         
     }
 
     void OnCollisionEnter2D(Collision2D collision)

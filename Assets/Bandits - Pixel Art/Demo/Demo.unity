@@ -220,7 +220,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -963,6 +963,7 @@ MonoBehaviour:
   startPoint: {fileID: 217717172}
   endPoint: {fileID: 993698241}
   speed: 1
+  isBossDead: 0
 --- !u!1 &80709777
 GameObject:
   m_ObjectHideFlags: 0
@@ -2645,7 +2646,7 @@ Transform:
   m_GameObject: {fileID: 148036257}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -37.8, y: -4.4, z: 0}
+  m_LocalPosition: {x: -38.1, y: -4.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2673,6 +2674,9 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 128
+  dashSpeed: 10
+  normalSpeed: 6
+  isBoss2Dead: 0
 --- !u!114 &148036264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2709,9 +2713,10 @@ MonoBehaviour:
   attackRate: 1
   nextAttackTime: 2
   audioManager: {fileID: 1744093875}
-  damageTextPrefab: {fileID: 2946148992010954278, guid: 3203b9fbe77f8c144a385ade56aa24fe, type: 3}
   defense: 0
+  damageTextPrefab: {fileID: 2946148992010954278, guid: 3203b9fbe77f8c144a385ade56aa24fe, type: 3}
   playerHealth: {fileID: 148036265}
+  isBossDead: 0
 --- !u!114 &148036265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3369,7 +3374,7 @@ Transform:
   m_GameObject: {fileID: 181514768}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -37.8, y: -4.4, z: -10}
+  m_LocalPosition: {x: -38.1, y: -4.1, z: -10}
   m_LocalScale: {x: 1, y: 1.36, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4154,7 +4159,7 @@ GameObject:
   - component: {fileID: 244490009}
   m_Layer: 8
   m_Name: boss3
-  m_TagString: Untagged
+  m_TagString: enemies
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4606,7 +4611,7 @@ Transform:
   m_GameObject: {fileID: 269240981}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -37.8, y: -4.4, z: -10}
+  m_LocalPosition: {x: -38.1, y: -4.1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6757,6 +6762,7 @@ MonoBehaviour:
   startPoint: {fileID: 1798943749}
   endPoint: {fileID: 2050716355}
   speed: 1
+  isBossDead: 0
 --- !u!1 &458714578
 GameObject:
   m_ObjectHideFlags: 0
@@ -16700,6 +16706,7 @@ MonoBehaviour:
   startPoint: {fileID: 1843867528}
   endPoint: {fileID: 2081974942}
   speed: 1
+  isBossDead: 0
 --- !u!1 &1259540780
 GameObject:
   m_ObjectHideFlags: 0
