@@ -9,20 +9,37 @@ public class takedame : MonoBehaviour
 {
     [SerializeField] private Transform firePoint;
     [SerializeField] private GameObject[] fireballs;
-    public Animator animator;
-    public Transform attackPoint;
-    public float attackRange = 1f;
-    public LayerMask enemyLayers;
-    public int attackDamage = 20;
-    public int CurrentAttackDamage;
-    public float attackRate = 1f;
-    public float nextAttackTime = 0f;
-    private bool isAttacking = false;
-    public AudioManager audioManager; // Thêm biến tham chiếu đến AudioManager
-    public GameObject damageTextPrefab; // Reference to DamageText prefab
-    public bool defense;
-    public Health playerHealth;
+    public Animator animator;                           public Transform attackPoint;
+    public float attackRange = 1f;                      public LayerMask enemyLayers;
+    public int attackDamage = 20;                       public int CurrentAttackDamage;
+    public float attackRate = 1f;                       public float nextAttackTime = 0f;
+    private bool isAttacking = false;                   public AudioManager audioManager; // Thêm biến tham chiếu đến AudioManager
+    public bool defense;                                public GameObject damageTextPrefab; // Reference to DamageText prefab
+    public Health playerHealth;                         public bool isBossDead = false;
     // Update is called once per frame
+    void Start()
+    {
+        bossHealth.BossDied += CanSpell;
+    }
+    void OnDestroy()
+    {
+        // Hủy đăng ký sự kiện BossDied để tránh rò rỉ bộ nhớ
+        bossHealth.BossDied -= CanSpell;
+    }
+
+    void CanSpell()
+    {
+        isBossDead = true;
+    }
+
+    private void FixedUpdate()
+    {
+        // Di chuyển nền chỉ khi boss đã chết
+        if (isBossDead)
+        {
+            Spell();
+        }
+    }
     void Update()
     {
 
@@ -31,22 +48,14 @@ public class takedame : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 StartCoroutine(Attack());
-                nextAttackTime = Time.time + 0f / attackRate;
+                nextAttackTime = Time.time;
             }
             if (Input.GetMouseButtonDown(1))
             {
                 StartCoroutine(CritAttack());
-                nextAttackTime = Time.time + 5f / attackRate;
-            }
-            if (Input.GetKey("e"))
-            {
-                animator.SetTrigger("spell");
-                 Cast();
+                nextAttackTime = Time.time + 4f / attackRate;
             }
         }
-
-
-
     }
     IEnumerator Attack()
     {
@@ -79,6 +88,17 @@ public class takedame : MonoBehaviour
     {
         fireballs[0].transform.position = firePoint.position;
         fireballs[0].GetComponent<spell>().SetDirection(Mathf.Sign(transform.localScale.x));
+    }
+
+
+
+    void Spell()
+    {
+        if (Input.GetKey("e"))
+        {
+            animator.SetTrigger("spell");
+            Cast();
+        }
     }
     private int FindFireball()
     {

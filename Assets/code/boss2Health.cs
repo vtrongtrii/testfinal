@@ -14,7 +14,7 @@ public class boss2Health : MonoBehaviour
     public Animator anim;
     private BossDamage enemyAttack;
     private enemies_move enemyMovement;
-    public static event Action BossDied;
+    public static event Action Boss2Died;
     public int increaseMaxHealthAmount=200;
     // Start is called before the first frame update
     void Start()
@@ -51,7 +51,7 @@ public class boss2Health : MonoBehaviour
     }
     void Die()
     {
-        BossDied?.Invoke();
+        Boss2Died?.Invoke();
         if (!isAlive)
             return;
 
