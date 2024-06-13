@@ -66,9 +66,7 @@ public class spell : MonoBehaviour
         direction = _direction;
         gameObject.SetActive(true);
         hit = false;
-        boxCollider.enabled = true;
-
-         
+        boxCollider.enabled = true;    
     }
 
     void OnCollisionEnter2D(Collision2D collision)

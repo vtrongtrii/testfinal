@@ -23,6 +23,7 @@ public class enemyHealth : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
+        if (!isAlive) return; // Nếu enemy đã chết, không thực hiện hành động nào nữa
         currentHealth -= damage;
 
         if (isAlive)
@@ -49,6 +50,15 @@ public class enemyHealth : MonoBehaviour
         anim.SetTrigger("Isdead");
         isAlive = false;
         Debug.Log("chet roi");
+        StartCoroutine(DieCoroutine());
+        // Vô hiệu hóa tất cả các collider của enemy
+        Collider2D[] colliders = GetComponents<Collider2D>();
+        foreach (Collider2D collider in colliders)
+        {
+            collider.enabled = false;
+        }
+        // Ẩn thanh máu
+        EnemyHealth.gameObject.SetActive(false);
         StartCoroutine(DieCoroutine());
     }
     IEnumerator DieCoroutine()
