@@ -8,19 +8,22 @@ using UnityEngine.Events;
 using UnityEngine.XR;
 public class Health : MonoBehaviour
 {
-    [SerializeField] public int maxHealth; public bool defense = false;
-    public int currentHealth; public GameObject pausebutton;
-    public HealthBar healthBar; public takedame huhu;
-    public UnityEvent onDeath; public GameObject healTextPrefab; // Prefab cho HealText
-    public Animator anim;
-    public GameObject gameOverCanvas;
-    public float maxFallHeight = -8f;
-    public int maxHealingCount;
-    public int currentHealingCount = 0;
-    private AudioManager audioManager;
+    [SerializeField] public int maxHealth;                                                                  public bool defense = false;
+    public int currentHealth;                                                                               public GameObject pausebutton;
+    public HealthBar healthBar;                                                                             public takedame huhu;
+    public UnityEvent onDeath;                                                                              public GameObject healTextPrefab; 
+    public Animator anim;                                                                                   
+    public GameObject gameOverCanvas;                                                                        
+    public float maxFallHeight = -8f;                                                                                                                                      
+    public int maxHealingCount;                                                                             
+    public int currentHealingCount = 0;                                                                      
+    private AudioManager audioManager;                                                                       
     public GameObject pauseButton;
-    public Vector3 healTextOffset = new Vector3(0, 2, 0); // Vị trí offset của HealText
+    public Vector3 healTextOffset = new Vector3(0, 2, 0);  
     private List<GameObject> healTextInstances = new List<GameObject>(); // Danh sách để quản lý các HealText instances
+   
+   
+
     private void Awake()
     {
         audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
@@ -32,6 +35,7 @@ public class Health : MonoBehaviour
     }
     public void FixedUpdate()
     {
+         
         if (transform.position.y < maxFallHeight)
         {
             currentHealth = 0;
@@ -40,28 +44,62 @@ public class Health : MonoBehaviour
         }
         healthBar.UpdateHealth(currentHealth, maxHealth);
     }
-    public void Update()
+    private float defenceTime = 0f; // Thời điểm kích hoạt phòng thủ
+    private float defenceDuration = 5f; // Thời lượng phòng thủ (5 giây)
+    private float lastDefenceTime = -Mathf.Infinity; // Thời điểm cuối cùng khi phòng thủ được kích hoạt
+
+    void Update()
     {
         defence();
+        if (defense && Time.time >= defenceTime + defenceDuration)
+        {
+            defense = false; // Vô hiệu hóa phòng thủ
+            anim.SetBool("defense", defense); // Cập nhật trạng thái animation phòng thủ
+        }
     }
+
     public void takeDamage(int damage)
     {
-        if (!defense)
-
+        if (defense)
         {
-            currentHealth -= damage;
-            if (currentHealth < maxHealth)
-            {
-                anim.SetTrigger("isHurt");
-            }
+            return;
         }
+
+        currentHealth -= damage;
+        anim.SetTrigger("isHurt");
+
         if (currentHealth <= 0)
         {
- 
+            currentHealth = 0;  // Ensure health doesn't drop below 0
             Die();
         }
+
         healthBar.UpdateHealth(currentHealth, maxHealth);
     }
+
+   
+
+    public  void defence()
+    {
+        if (Input.GetKey("q"))
+        {
+            defense = true; // Bật phòng thủ
+            anim.SetBool("defense", defense); // Cập nhật trạng thái animation phòng thủ
+        }
+        else
+        {
+            defense = false; // Tắt phòng thủ
+            anim.SetBool("defense", defense); // Cập nhật trạng thái animation phòng thủ
+        }
+         
+    }
+
+    public bool IsDefending()
+    {
+        return defense;
+    }
+
+    
     private void ShowHealText(string text, Color color)
     {
         if (healTextPrefab != null)
@@ -109,23 +147,7 @@ public class Health : MonoBehaviour
         audioManager.PlaySFX(audioManager.musicDie);
     }
 
-    public void defence()
-    {
-        if (Input.GetKey("q"))
-        {
-
-            defense = true;
-            anim.SetBool("defense", defense);
-        }
-        else
-
-            defense = false;
-        anim.SetBool("defense", defense);
-    }
-    public bool IsDefending()
-    {
-        return defense;
-    }
+     
     private void OnApplicationQuit()
     {
         // Phá hủy tất cả các HealText instances khi ứng dụng kết thúc

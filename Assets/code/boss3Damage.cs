@@ -49,45 +49,15 @@ public class boss3Damage : MonoBehaviour
 
         defaultSpeed = speed; // Khởi tạo tốc độ mặc định
     }
-
-    void Update()
-    {
-        if (IsDead) return;
-
-
-        if (target != null)
-        {
-            float distanceToTarget = Vector3.Distance(transform.position, target.position);
-
-            if (distanceToTarget <= attackRange1 && Time.time >= nextAttackTime1)
-            {
-                Attack1();
-                nextAttackTime1 = Time.time + attackCooldown1;
-            }
-            else if (distanceToTarget <= attackRange2 && Time.time >= nextAttackTime2)
-            {
-                Attack2();
-                nextAttackTime2 = Time.time + attackCooldown2;
-            }
-            else if (distanceToTarget <= chaseRange)
-            {
-                Chase();
-            }
-            else
-            {
-                anim.SetBool("isRunning", false);
-            }
-        }
-
-
-    }
-
     void Chase()
     {
+        // Kích hoạt hoạt ảnh chạy
         anim.SetBool("isRunning", true);
+
+        // Tính toán hướng tới mục tiêu
         Vector3 direction = (target.position - transform.position).normalized;
 
-        // Đảm bảo boss di chuyển về phía player
+        // Di chuyển boss về phía mục tiêu một cách mượt mà
         transform.position = Vector3.MoveTowards(transform.position, target.position, speed * Time.deltaTime);
 
         // Kiểm tra và lật hướng của boss nếu cần thiết
@@ -96,13 +66,54 @@ public class boss3Damage : MonoBehaviour
             Flip();
         }
     }
+
     void Flip()
     {
+        // Chuyển đổi hướng mà boss đang đối mặt
         facingRight = !facingRight;
+
+        // Lật sprite/model của boss bằng cách đảo ngược tỷ lệ cục bộ
         Vector3 localScale = transform.localScale;
         localScale.x *= -1;
         transform.localScale = localScale;
     }
+
+    void Update()
+    {
+        // Nếu boss đã chết, không thực hiện bất kỳ hành động nào
+        if (IsDead) return;
+
+        // Kiểm tra nếu có mục tiêu
+        if (target != null)
+        {
+            // Tính khoảng cách đến mục tiêu
+            float distanceToTarget = Vector3.Distance(transform.position, target.position);
+
+            // Nếu khoảng cách đến mục tiêu nằm trong tầm tấn công 1 và đã đến thời gian tấn công tiếp theo
+            if (distanceToTarget <= attackRange1 && Time.time >= nextAttackTime1)
+            {
+                Attack1();
+                nextAttackTime1 = Time.time + attackCooldown1;
+            }
+            // Nếu khoảng cách đến mục tiêu nằm trong tầm tấn công 2 và đã đến thời gian tấn công tiếp theo
+            else if (distanceToTarget <= attackRange2 && Time.time >= nextAttackTime2)
+            {
+                Attack2();
+                nextAttackTime2 = Time.time + attackCooldown2;
+            }
+            // Nếu khoảng cách đến mục tiêu nằm trong tầm đuổi theo
+            else if (distanceToTarget <= chaseRange)
+            {
+                Chase();
+            }
+            // Nếu mục tiêu không nằm trong tầm tấn công hoặc đuổi theo, dừng chạy
+            else
+            {
+                anim.SetBool("isRunning", false);
+            }
+        }
+    }
+
 
     void Attack1()
     {
@@ -142,7 +153,7 @@ public class boss3Damage : MonoBehaviour
         if (IsDead) return;
 
         // Kiểm tra nếu có mục tiêu trong phạm vi tấn công
-        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(target.position, attackRange2);
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(target.position, attackRange1);
         foreach (Collider2D col in hitColliders)
         {
             if (col.CompareTag("Player"))

@@ -5,19 +5,18 @@ using UnityEngine;
 
 public class dichuyen : MonoBehaviour
 {
-    private bool m_grounded = false;                             public bool isfacingRight = true;                            
-    public float speed;                                          private float left_right;                                    
-    private Rigidbody2D rb;                                      public float jump;
-    public Vector2 boxSize;                                      public float castDistance;
-    public LayerMask groundLayer;                                private Animator animator;
-    float m_jumpForce = 10f; public float dashSpeed = 10f;      // Dash speed
-    public float dashDuration = 0.5f;  // Duration of the dash
-    public float dashCooldown = 2f;    // Cooldown duration for the dash
+    private bool m_grounded = false;                    public bool isfacingRight = true;
+    public float speed;                                 private float left_right;
+    private Rigidbody2D rb;                             public float jump;
+    public Vector2 boxSize;                             public float castDistance;
+    public LayerMask groundLayer;                       private Animator animator;
+    float m_jumpForce = 10f;                            public float dashSpeed = 30f;       
+    public float dashCooldown = 1f;    // Cooldown duration for the dash
     public float normalSpeed = 6f;
-    private float dashTime;            // Time when the dash started
+           // Time when the dash started
     private bool isDashing = false;    // Whether the player is currently dashing
-    private float lastDashTime;
-    private Sensor_Bandit m_groundSensor;                        
+    
+    private Sensor_Bandit m_groundSensor;
     public bool isBoss2Dead = false;
     // Start is called before the first frame update
     void Start()
@@ -54,7 +53,7 @@ public class dichuyen : MonoBehaviour
         left_right = Input.GetAxis("Horizontal");
 
         rb.velocity = new Vector2(left_right * speed, rb.velocity.y);
-   
+
         // Jump
         if (Input.GetButtonDown("Jump") && isGrounded())
         {
@@ -67,34 +66,25 @@ public class dichuyen : MonoBehaviour
 
         animator.SetFloat("Run", Mathf.Abs(left_right));
 
-        
+
         if (Input.GetMouseButtonDown(1))
         {
             animator.SetTrigger("CritAttack");
         }
         float longitude = transform.position.y;
-         
+
     }
     public void Dash()
     {
         // Check if the player can dash (not already dashing and cooldown has elapsed)
-        if (Input.GetKeyDown(KeyCode.LeftShift) && !isDashing && (Time.time - lastDashTime > dashCooldown))
+        if (Input.GetKey(KeyCode.LeftShift)   && (Time.time > dashCooldown))
         {
             animator.SetTrigger("dash");
             speed = dashSpeed;
-            isDashing = true;
-            dashTime = Time.time; // Record the time when the dash started
-            lastDashTime = Time.time; // Record the time when the dash occurred
+            
         }
-        if (isDashing)
-        {
-            // Kiểm tra nếu thời gian kéo dài của cú lao nhanh đã hết
-            if (Time.time - dashTime > dashDuration)
-            {
-                isDashing = false;
-                speed = normalSpeed;
-            }
-        }
+        else
+            speed = normalSpeed;
     }
 
     public bool isGrounded()
@@ -125,6 +115,3 @@ public class dichuyen : MonoBehaviour
         }
     }
 }
-
-
-

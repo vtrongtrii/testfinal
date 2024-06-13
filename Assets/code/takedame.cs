@@ -16,7 +16,7 @@ public class takedame : MonoBehaviour
     private bool isAttacking = false;                   public AudioManager audioManager; // Thêm biến tham chiếu đến AudioManager
     public bool defense;                                public GameObject damageTextPrefab; // Reference to DamageText prefab
     public Health playerHealth;                         public bool isBossDead = false;
-    // Update is called once per frame
+    private float nextCritAttackTime = 0f;              private float critAttackCooldown = 2f;
     void Start()
     {
         bossHealth.BossDied += CanSpell;
@@ -40,57 +40,73 @@ public class takedame : MonoBehaviour
             Spell();
         }
     }
-    void Update()
+    private void Update()
     {
-
         if (Time.time >= nextAttackTime && !isAttacking)
         {
             if (Input.GetMouseButtonDown(0))
             {
-                StartCoroutine(Attack());
-                nextAttackTime = Time.time;
+                Attack();
+                nextAttackTime = Time.time + 0.5f / attackRate;
             }
+        }
+        if ( Time.time >= nextCritAttackTime && !isAttacking)
+        {
             if (Input.GetMouseButtonDown(1))
             {
                 StartCoroutine(CritAttack());
-                nextAttackTime = Time.time + 4f / attackRate;
-            }
+                nextCritAttackTime = Time.time + critAttackCooldown;
+            }  
+        }
+        else
+        {
+            animator.SetBool("crit", false);
         }
     }
-    IEnumerator Attack()
+    
+
+    public void Attack()
     {
-        // Phát âm thanh sfx khi đánh
-        if (audioManager != null)
-        {
-            audioManager.PlaySFX(audioManager.strikePlayerClip);
-        }
+        PlayAttackSFX();
         isAttacking = true;
         animator.SetTrigger("Attack");
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-        PerformAttack(CurrentAttackDamage);
+   
         isAttacking = false;
     }
 
-    IEnumerator CritAttack()
+    private IEnumerator CritAttack()
     {
-        // Phát âm thanh sfx khi đánh
+        PlayAttackSFX();
+        isAttacking = true;
+        animator.SetBool("crit", true);
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length); // Chờ đến khi hoạt ảnh kết thúc
+        PerformCriticalAttack();
+        isAttacking = false;
+    }
+    private void PlayAttackSFX()
+    {
         if (audioManager != null)
         {
             audioManager.PlaySFX(audioManager.strikePlayerClip);
         }
-        isAttacking = true;
-        animator.SetTrigger("CritAttack");
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+    }
+
+    // Animation Event cho đòn tấn công thường
+    public void PerformNormalAttack()
+    {
+        PerformAttack(CurrentAttackDamage);
+    }
+
+    // Animation Event cho đòn tấn công chí mạng
+    public void PerformCriticalAttack()
+    {
         PerformAttack(CurrentAttackDamage * 2);
-        isAttacking = false;
     }
     private void Cast()
     {
         fireballs[0].transform.position = firePoint.position;
         fireballs[0].GetComponent<spell>().SetDirection(Mathf.Sign(transform.localScale.x));
     }
-
-
 
     void Spell()
     {
@@ -99,15 +115,6 @@ public class takedame : MonoBehaviour
             animator.SetTrigger("spell");
             Cast();
         }
-    }
-    private int FindFireball()
-    {
-        for (int i = 0; i < fireballs.Length; i++)
-        {
-            if(!fireballs[i].gameObject.activeInHierarchy)
-                return i;
-        }
-        return 0;
     }
     void PerformAttack(int damage)
     {
@@ -128,13 +135,12 @@ public class takedame : MonoBehaviour
             else
             {
                 bossHealth bossComponent = enemy.GetComponent<bossHealth>();
-               
                 if (bossComponent != null)
                 {
                     bossComponent.TakeDamage(damage);
-                     
                     ShowDamageText(damage, bossComponent.transform.position); // Show damage text
                 }
+
                 boss2Health boss2Component = enemy.GetComponent<boss2Health>();
                 if (boss2Component != null)
                 {
@@ -145,7 +151,16 @@ public class takedame : MonoBehaviour
         }
     }
 
-    void ShowDamageText(int damage, Vector3 position)
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null)
+            return;
+
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
+
+
+void ShowDamageText(int damage, Vector3 position)
     {
         if (damageTextPrefab != null)
         {
@@ -157,12 +172,7 @@ public class takedame : MonoBehaviour
             }
         }
     }
-    private void OnDrawGizmosSelected()
-    {
-        if (attackPoint == null)
-            return;
-        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
-    }
+    
     public void DamageIncreae(int amount)
     {
         CurrentAttackDamage += amount;
